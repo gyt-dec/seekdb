@@ -537,6 +537,8 @@ SQL_PRIVATE_HEADERS = [
     "engine/expr/ob_expr_acos.h",
     "engine/expr/ob_expr_add.h",
     "engine/expr/ob_expr_agg_param_list.h",
+    "engine/expr/ob_expr_ai/ai_prompt_template.h",
+    "engine/expr/ob_expr_ai/ai_response_index_map.h",
     "engine/expr/ob_expr_ai/ob_ai_func_client.h",
     "engine/expr/ob_expr_ai/ob_expr_ai_complete.h",
     "engine/expr/ob_expr_ai/ob_expr_ai_embed.h",
