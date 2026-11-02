@@ -45,5 +45,34 @@ class SQLCaseSelectionTest(unittest.TestCase):
         self.assertEqual(args.cases, ["ai_function.ai_function_enhancement"])
 
 
+class FailureAnnotationTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        spec = importlib.util.spec_from_file_location(
+            "ai_acceptance_diagnostics", ROOT / ".github/script/seekdb/ai_acceptance_diagnostics.py")
+        cls.diagnostics = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(cls.diagnostics)
+
+    def test_log_text_cannot_inject_workflow_commands(self):
+        self.assertEqual(self.diagnostics.escape_annotation("100%\r\n::warning::text"),
+                         "100%25%0D%0A::warning::text")
+
+    def test_missing_log_is_explicit(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as path:
+            self.assertIn("No build or test log", self.diagnostics.last_failure_annotation(Path(path)))
+
+    def test_log_tail_is_bounded_and_symlinks_are_ignored(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as path:
+            folder = Path(path)
+            (folder / "build.log").write_text("x" * 20000 + "\nactual compile error\n")
+            (folder / "sql-tests.log").symlink_to(folder / "build.log")
+            result = self.diagnostics.last_failure_annotation(folder)
+            self.assertTrue(result.startswith("build.log\n"))
+            self.assertTrue(result.endswith("actual compile error"))
+            self.assertLessEqual(len(result), 6010)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -17,7 +17,7 @@
 
 ## 已执行的验证
 
-- 独立 CMake/CTest：2 个目标均通过，其中包括 7 个原生 GoogleTest 测试和 9 个 Python Mock HTTP 协议测试。
+- 独立 CMake/CTest：3 个目标均通过，其中包括 7 个原生 GoogleTest 测试、9 个 Python Mock HTTP 协议测试，以及 SQL 用例选择和诊断输出的 9 个测试。
 - 原生算法使用 AddressSanitizer 和 UndefinedBehaviorSanitizer：Prompt 覆盖 19 项场景与 4096 个短模板扫描；生产代码共用的响应索引映射覆盖 1～8 条输入的全部 46233 个排列，以及重复、缺项、越界索引。
 - 独立 libcurl 实验：128000 字节的请求体（包含 NUL）在原始缓冲区销毁后传输长度及 SHA-256 一致。这验证 libcurl 选项的传输行为，不等同于运行 seekdb 的 HTTP 客户端。
 - `git diff --check` 通过。
@@ -84,3 +84,13 @@ python3 unittest/sql/engine/expr/ai_mock_service.py --port 8000
 
 原有 `ai_prompt.test` 中把 JSON/TEXT 判为不支持的历史预期与本赛题新增能力冲突；未修改这些
 官方文件，需要在实际数据库上确认比赛要求的更新预期。
+
+## 完整 CI 验收
+
+`.github/workflows/ai-function-acceptance.yml` 在实现分支 push 或手动触发时执行：固定工具链安装、
+修改后的 seekdb 完整构建、独立核心测试、官方 `ai_function_enhancement`、模型/Endpoint DDL 回归，
+以及 `ai_function_enhancement_regression`。最后一项使用本地 Mock，覆盖 140 行输入的乱序向量回填、
+NULL/过滤/LIMIT、42 条文档的跨批次重排、长 Prompt 和错误恢复；工作流还检查实际请求包含多行且不超过 64 条。
+
+这些完整编译和 SQL 结果以 Actions 对具体提交的实际执行为准，不能由本地核心测试替代。
+失败时，关键日志末尾会附到公开 check 注释；完整日志保存在该次运行的 artifact。

@@ -1,0 +1,99 @@
+# Local Mock AI fixture regression; model quality is not evaluated.
+connection default;
+--disable_query_log
+--disable_result_log
+set names utf8mb4;
+set ob_query_timeout=60000000;
+--error 0,11118
+call DBMS_AI_SERVICE.DROP_AI_MODEL('reg_ai_complete');
+--error 0,11112
+call DBMS_AI_SERVICE.DROP_AI_MODEL_ENDPOINT('reg_ai_complete_ep');
+call DBMS_AI_SERVICE.CREATE_AI_MODEL('reg_ai_complete','{"type":"completion","model_name":"completion-any"}');
+call DBMS_AI_SERVICE.CREATE_AI_MODEL_ENDPOINT('reg_ai_complete_ep','{"ai_model_name":"reg_ai_complete","scope":"all","url":"http://0.0.0.0:8000/v1/chat/completions","access_key":"mock-key","provider":"openai"}');
+--error 0,11118
+call DBMS_AI_SERVICE.DROP_AI_MODEL('reg_ai_embed');
+--error 0,11112
+call DBMS_AI_SERVICE.DROP_AI_MODEL_ENDPOINT('reg_ai_embed_ep');
+call DBMS_AI_SERVICE.CREATE_AI_MODEL('reg_ai_embed','{"type":"dense_embedding","model_name":"embed-any"}');
+call DBMS_AI_SERVICE.CREATE_AI_MODEL_ENDPOINT('reg_ai_embed_ep','{"ai_model_name":"reg_ai_embed","scope":"all","url":"http://0.0.0.0:8000/v1/embeddings?fault=reverse","access_key":"mock-key","provider":"openai"}');
+--error 0,11118
+call DBMS_AI_SERVICE.DROP_AI_MODEL('reg_ai_rerank');
+--error 0,11112
+call DBMS_AI_SERVICE.DROP_AI_MODEL_ENDPOINT('reg_ai_rerank_ep');
+call DBMS_AI_SERVICE.CREATE_AI_MODEL('reg_ai_rerank','{"type":"rerank","model_name":"rerank-any"}');
+call DBMS_AI_SERVICE.CREATE_AI_MODEL_ENDPOINT('reg_ai_rerank_ep','{"ai_model_name":"reg_ai_rerank","scope":"all","url":"http://0.0.0.0:8000/v1/rerank?fault=reverse","access_key":"mock-key","provider":"siliconflow"}');
+drop table if exists reg_ai_rows;
+create table reg_ai_rows(id int primary key, content text, expected decimal(10,6));
+insert into reg_ai_rows values (1,'row-1',-0.882812),(2,'row-2',-0.460938),(3,'row-3',-0.078125),(4,'row-4',-0.953125),(5,'row-5',-0.296875),(6,'row-6',0.257812),(7,null,-0.359375),(8,'row-8',0.039062),(9,'row-9',0.859375),(10,'row-10',-0.843750),(11,'row-11',-0.632812),(12,'row-12',0.953125),(13,'row-13',0.804688),(14,null,-0.937500),(15,'row-15',-0.156250),(16,'row-16',-0.437500),(17,'row-17',0.593750),(18,'row-18',0.242188),(19,'row-19',-0.703125),(20,'row-20',0.585938),(21,null,-0.179688),(22,'row-22',-0.898438),(23,'row-23',-0.968750),(24,'row-24',-0.593750),(25,'row-25',0.218750),(26,'row-26',0.179688),(27,'row-27',0.664062),(28,null,-0.460938),(29,'row-29',-0.976562),(30,'row-30',0.625000),(31,'row-31',-0.890625),(32,'row-32',-0.187500),(33,'row-33',-0.484375),(34,'row-34',0.640625),(35,null,0.453125),(36,'row-36',-0.843750),(37,'row-37',0.562500),(38,'row-38',-0.304688),(39,'row-39',0.375000),(40,'row-40',0.914062),(41,'row-41',-0.437500),(42,null,-0.421875),(43,'row-43',0.125000),(44,'row-44',-0.890625),(45,'row-45',0.984375),(46,'row-46',0.984375),(47,'row-47',-1.000000),(48,'row-48',0.992188),(49,null,-0.367188),(50,'row-50',0.382812),(51,'row-51',-0.117188),(52,'row-52',0.859375),(53,'row-53',0.453125),(54,'row-54',0.851562),(55,'row-55',-0.445312),(56,null,-0.335938),(57,'row-57',-0.242188),(58,'row-58',0.070312),(59,'row-59',-0.250000),(60,'row-60',-0.726562),(61,'row-61',0.328125),(62,'row-62',0.710938),(63,null,-0.468750),(64,'row-64',-0.859375),(65,'row-65',0.164062),(66,'row-66',0.039062),(67,'row-67',0.968750),(68,'row-68',-0.218750),(69,'row-69',-0.695312),(70,null,-0.843750),(71,'row-71',0.210938),(72,'row-72',0.015625),(73,'row-73',-0.718750),(74,'row-74',-0.859375),(75,'row-75',0.093750),(76,'row-76',-0.007812),(77,null,-0.007812),(78,'row-78',-0.304688),(79,'row-79',-0.734375),(80,'row-80',-0.906250),(81,'row-81',0.945312),(82,'row-82',-0.898438),(83,'row-83',-0.171875),(84,null,-0.671875),(85,'row-85',0.296875),(86,'row-86',0.320312),(87,'row-87',-0.570312),(88,'row-88',0.070312),(89,'row-89',-0.960938),(90,'row-90',-0.304688),(91,null,-0.476562),(92,'row-92',0.632812),(93,'row-93',-0.859375),(94,'row-94',0.281250),(95,'row-95',0.742188),(96,'row-96',-0.898438),(97,'row-97',0.007812),(98,null,-0.234375),(99,'row-99',-0.742188),(100,'row-100',-0.679688),(101,'row-101',-0.023438),(102,'row-102',0.718750),(103,'row-103',-0.851562),(104,'row-104',0.343750),(105,null,0.023438),(106,'row-106',0.976562),(107,'row-107',0.328125),(108,'row-108',0.757812),(109,'row-109',-0.578125),(110,'row-110',0.820312),(111,'row-111',0.960938),(112,null,-0.375000),(113,'row-113',-0.906250),(114,'row-114',0.218750),(115,'row-115',-0.890625),(116,'row-116',-0.882812),(117,'row-117',-0.976562),(118,'row-118',0.218750),(119,null,-0.648438),(120,'row-120',0.812500),(121,'row-121',-0.609375),(122,'row-122',-0.367188),(123,'row-123',-0.867188),(124,'row-124',-0.117188),(125,'row-125',0.234375),(126,null,-0.710938),(127,'row-127',-0.179688),(128,'row-128',0.546875),(129,'row-129',-0.867188),(130,'row-130',-0.007812),(131,'row-131',0.460938),(132,'row-132',0.718750),(133,null,-0.328125),(134,'row-134',0.414062),(135,'row-135',0.757812),(136,'row-136',0.570312),(137,'row-137',-0.359375),(138,'row-138',-0.140625),(139,'row-139',0.695312),(140,null,0.476562);
+--enable_result_log
+--echo repeated long Prompt
+select ai_complete('reg_ai_complete',ai_prompt('{0}/{0}',repeat('x',10000)),null)=concat('mock: ',repeat('x',10000),'/',repeat('x',10000)) as ok;
+--echo Unicode and literal braces
+select ai_complete('reg_ai_complete',ai_prompt('{{{0}}}','世界'))='mock: {世界}' as ok;
+--echo nested JSON Prompt
+select ai_complete('reg_ai_complete',ai_prompt('outer[{0}]',ai_prompt('inner {0}',json_object('k','世界')))) like 'mock: outer[inner %世界%]' as ok;
+--echo native JSON generation config
+select ai_complete('reg_ai_complete','hello',json_object('temperature',0.2,'max_tokens',16))='mock: hello' as ok;
+--echo reversed Embedding batches preserve row identity and NULL
+select count(*) as row_count, sum(if(content is null,embedding is null,json_length(embedding)=4 and abs(cast(json_extract(embedding,'$[0]') as decimal(10,6))-expected)<0.000001)) as matching_rows from (select id,content,expected,ai_embed('reg_ai_embed',content,4) as embedding from reg_ai_rows) x;
+--echo filtered Embedding batches
+select count(*) as row_count, sum(if(content is null,embedding is null,json_length(embedding)=4 and abs(cast(json_extract(embedding,'$[0]') as decimal(10,6))-expected)<0.000001)) as matching_rows from (select id,content,expected,ai_embed('reg_ai_embed',content,4) as embedding from reg_ai_rows where id between 60 and 75) x;
+--echo Embedding LIMIT preserves ordered rows
+select id,json_length(ai_embed('reg_ai_embed',content,4)) as dimension from reg_ai_rows where id>=60 order by id limit 5;
+--echo scalar NULL does not call the model
+select ai_embed('reg_ai_embed',null,4) is null as ok;
+--echo Rerank across three batches restores global indices
+select json_extract(r,'$[0].index')=41 and json_length(r)=42 as ok from (select ai_rerank('reg_ai_rerank','needle','["hay","hay","hay","hay","hay","hay","hay","hay","hay","hay","hay","hay","hay","hay","hay","hay","hay","hay","hay","hay","hay","hay","hay","hay","hay","hay","hay","hay","hay","hay","hay","hay","hay","hay","hay","hay","hay","hay","hay","hay","hay","needle"]',null) as r) x;
+--echo Rerank ties use original input order
+select json_extract(r,'$[0].index')=0 and json_extract(r,'$[20].index')=20 and json_extract(r,'$[41].index')=41 as ok from (select ai_rerank('reg_ai_rerank','absent','["hay","hay","hay","hay","hay","hay","hay","hay","hay","hay","hay","hay","hay","hay","hay","hay","hay","hay","hay","hay","hay","hay","hay","hay","hay","hay","hay","hay","hay","hay","hay","hay","hay","hay","hay","hay","hay","hay","hay","hay","hay","needle"]',null) as r) x;
+--echo Rerank objects retain original IDs across batches
+select json_unquote(json_extract(r,'$[0].id'))='doc-41' and json_length(r)=42 as ok from (select ai_rerank('reg_ai_rerank','needle','[{"id":"doc-0","text":"hay"},{"id":"doc-1","text":"hay"},{"id":"doc-2","text":"hay"},{"id":"doc-3","text":"hay"},{"id":"doc-4","text":"hay"},{"id":"doc-5","text":"hay"},{"id":"doc-6","text":"hay"},{"id":"doc-7","text":"hay"},{"id":"doc-8","text":"hay"},{"id":"doc-9","text":"hay"},{"id":"doc-10","text":"hay"},{"id":"doc-11","text":"hay"},{"id":"doc-12","text":"hay"},{"id":"doc-13","text":"hay"},{"id":"doc-14","text":"hay"},{"id":"doc-15","text":"hay"},{"id":"doc-16","text":"hay"},{"id":"doc-17","text":"hay"},{"id":"doc-18","text":"hay"},{"id":"doc-19","text":"hay"},{"id":"doc-20","text":"hay"},{"id":"doc-21","text":"hay"},{"id":"doc-22","text":"hay"},{"id":"doc-23","text":"hay"},{"id":"doc-24","text":"hay"},{"id":"doc-25","text":"hay"},{"id":"doc-26","text":"hay"},{"id":"doc-27","text":"hay"},{"id":"doc-28","text":"hay"},{"id":"doc-29","text":"hay"},{"id":"doc-30","text":"hay"},{"id":"doc-31","text":"hay"},{"id":"doc-32","text":"hay"},{"id":"doc-33","text":"hay"},{"id":"doc-34","text":"hay"},{"id":"doc-35","text":"hay"},{"id":"doc-36","text":"hay"},{"id":"doc-37","text":"hay"},{"id":"doc-38","text":"hay"},{"id":"doc-39","text":"hay"},{"id":"doc-40","text":"hay"},{"id":"doc-41","text":"needle"}]','text') as r) x;
+--disable_result_log
+--error 1210
+select ai_embed('reg_ai_embed','text',0);
+--error 1210
+select ai_embed('reg_ai_embed','text',2.5);
+--error 1210
+select ai_complete('reg_ai_complete',ai_prompt('{99}','x'));
+--error 1210
+select ai_complete('reg_ai_complete','hello','[]');
+--error 1210
+select ai_complete('reg_ai_complete','hello',json_object('max_tokens',0));
+call DBMS_AI_SERVICE.ALTER_AI_MODEL_ENDPOINT('reg_ai_embed_ep','{"url":"http://0.0.0.0:8000/v1/embeddings?fault=wrong_dimension"}');
+--error 1210
+select ai_embed('reg_ai_embed','text',4);
+call DBMS_AI_SERVICE.ALTER_AI_MODEL_ENDPOINT('reg_ai_embed_ep','{"url":"http://0.0.0.0:8000/v1/embeddings?fault=missing_index"}');
+--error 4070
+select ai_embed('reg_ai_embed','text',4);
+call DBMS_AI_SERVICE.ALTER_AI_MODEL_ENDPOINT('reg_ai_embed_ep','{"url":"http://0.0.0.0:8000/v1/embeddings?fault=bad_number"}');
+--error 4070
+select ai_embed('reg_ai_embed','text',4);
+call DBMS_AI_SERVICE.ALTER_AI_MODEL_ENDPOINT('reg_ai_embed_ep','{"url":"http://0.0.0.0:8000/v1/embeddings?fault=non_object"}');
+--error 4070
+select ai_embed('reg_ai_embed','text',4);
+call DBMS_AI_SERVICE.ALTER_AI_MODEL_ENDPOINT('reg_ai_embed_ep','{"url":"http://0.0.0.0:8000/v1/embeddings?fault=invalid_json"}');
+--error 3140
+select ai_embed('reg_ai_embed','text',4);
+call DBMS_AI_SERVICE.ALTER_AI_MODEL_ENDPOINT('reg_ai_complete_ep','{"url":"http://0.0.0.0:8000/v1/chat/completions?fault=empty_completion"}');
+--error 4070
+select ai_complete('reg_ai_complete','hello');
+call DBMS_AI_SERVICE.ALTER_AI_MODEL_ENDPOINT('reg_ai_complete_ep','{"url":"http://0.0.0.0:8000/v1/chat/completions?fault=null_completion"}');
+--error 4070
+select ai_complete('reg_ai_complete','hello');
+call DBMS_AI_SERVICE.ALTER_AI_MODEL_ENDPOINT('reg_ai_rerank_ep','{"url":"http://0.0.0.0:8000/v1/rerank?fault=duplicate_index"}');
+--error 4070
+select ai_rerank('reg_ai_rerank','x','["a","b"]',null);
+--enable_result_log
+--echo invalid input and response checks passed
+--echo ordinary SQL still works after AI errors
+select count(*) as row_count from reg_ai_rows;
+--disable_result_log
+drop table reg_ai_rows;
+call DBMS_AI_SERVICE.DROP_AI_MODEL('reg_ai_complete');
+call DBMS_AI_SERVICE.DROP_AI_MODEL_ENDPOINT('reg_ai_complete_ep');
+call DBMS_AI_SERVICE.DROP_AI_MODEL('reg_ai_embed');
+call DBMS_AI_SERVICE.DROP_AI_MODEL_ENDPOINT('reg_ai_embed_ep');
+call DBMS_AI_SERVICE.DROP_AI_MODEL('reg_ai_rerank');
+call DBMS_AI_SERVICE.DROP_AI_MODEL_ENDPOINT('reg_ai_rerank_ep');
+--enable_result_log
+--enable_query_log
