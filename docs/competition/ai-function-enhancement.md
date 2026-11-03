@@ -92,9 +92,10 @@ python3 unittest/sql/engine/expr/ai_mock_service.py --port 8000
 ## 完整 CI 验收
 
 `.github/workflows/ai-function-acceptance.yml` 在实现分支 push 或手动触发时执行：固定工具链安装、
-修改后的 seekdb 完整构建、独立核心测试、官方 `ai_function_enhancement`、模型/Endpoint DDL 回归，
+修改后的 seekdb 完整构建、独立核心测试、官方 `ai_function_enhancement` 和模型 DDL 回归，
 以及 `ai_function_enhancement_regression`。最后一项使用本地 Mock，覆盖 140 行输入的乱序向量回填、
 NULL/过滤/LIMIT、42 条文档的跨批次重排、长 Prompt 和错误恢复；工作流还检查实际请求包含多行且不超过 64 条。
 
+当前分支的 `ai_model_endpoint_ddl` 仍断言产品已移除的 `max_concurrency` 字段，因此不纳入本赛题专项验收。
 这些完整编译和 SQL 结果以 Actions 对具体提交的实际执行为准，不能由本地核心测试替代。
 失败时，关键日志末尾会附到公开 check 注释；完整日志保存在该次运行的 artifact。

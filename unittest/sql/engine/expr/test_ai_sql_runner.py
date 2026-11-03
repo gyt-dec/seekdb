@@ -73,6 +73,19 @@ class FailureAnnotationTest(unittest.TestCase):
             self.assertTrue(result.endswith("actual compile error"))
             self.assertLessEqual(len(result), 6010)
 
+    def test_all_sql_case_failures_are_reported(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as path:
+            folder = Path(path)
+            for name, message in (("first.case", "first error"), ("second.case", "second error")):
+                failure = folder / "sql" / "failures" / name
+                failure.mkdir(parents=True)
+                (failure / "mysqltest.log").write_text(message)
+            result = self.diagnostics.last_failure_annotation(folder)
+            self.assertIn("first.case\nfirst error", result)
+            self.assertIn("second.case\nsecond error", result)
+            self.assertLessEqual(len(result), 6000)
+
 
 if __name__ == "__main__":
     unittest.main()
