@@ -51,15 +51,19 @@ g++ -std=c++17 -Wall -Wextra -Werror -pthread \
 
 本次使用 GoogleTest v1.16.0（`6910c9d9165801d8827d628cb72eb7ea9dd538c5`）。
 
-## 未完成的验证
+## 尚待完成的验证
 
-`bash build.sh init` 下载固定依赖时，环境代理对 `mirrors.oceanbase.com` 返回 403；
-完整 seekdb 编译尚未执行，不能视为已经编译通过。
+提交 `f71f2164d2808e82c8d10b08e69f02273427d5e2` 已在 GitHub Actions 上完成
+seekdb release 全量编译。首次验收随后在独立测试阶段中止；本地复现发现测试断言全部通过后，
+LeakSanitizer 会因受限运行环境的进程检查失败而返回非零。工作流已保留 AddressSanitizer 和
+UndefinedBehaviorSanitizer，仅对该独立测试关闭 leak pass，并补充完整阶段日志和隐藏目录
+artifact 上传，以便后续运行保留精确证据。
 
 `test_ob_openai_utils.cpp` 的 8 个 Provider/嵌套 JSON Prompt 回归测试，以及
 `test_ob_ai_func_client.cpp` 的 6 个 HTTP 客户端集成测试均依赖 seekdb 运行时，尚未编译或运行，
 不属于独立 CMake 目标。HTTP 集成测试默认标记为 DISABLED，需要准备运行时和服务后显式启用，
-不能把它们计入已通过测试。官方 `ai_function_enhancement.test` 及数据库回归测试也尚未运行。
+不能把它们计入已通过测试。官方 `ai_function_enhancement.test` 及数据库回归测试仍待修正后的
+Actions 运行。
 
 ## 本地 Mock AI 服务
 

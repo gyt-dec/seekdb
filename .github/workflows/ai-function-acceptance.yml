@@ -53,6 +53,7 @@ jobs:
           key: ${{ runner.os }}-ai-sdk-${{ hashFiles('deps/init/oceanbase.el9.x86_64.deps') }}
 
       - name: Cache C++ compilation
+        id: ccache
         uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
           path: ${{ env.CCACHE_DIR }}
@@ -75,15 +76,23 @@ jobs:
           test -x build_release/src/observer/seekdb
           echo "::notice title=AI acceptance stage::Modified seekdb compiled successfully"
 
+      - name: Save C++ compilation cache immediately
+        if: steps.ccache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ${{ steps.ccache.outputs.cache-primary-key }}
+
       - name: Run standalone core and protocol tests
         shell: bash
         run: |
           set -euo pipefail
-          cmake -S unittest/sql/engine/expr -B "$RUNNER_TEMP/ai-core" \
-            -DGTEST_SOURCE_DIR=/usr/src/googletest -DCMAKE_BUILD_TYPE=Debug
-          cmake --build "$RUNNER_TEMP/ai-core" -j2
-          ctest --test-dir "$RUNNER_TEMP/ai-core" --output-on-failure \
-            2>&1 | tee "$ACCEPTANCE_OUTPUT/core-tests.log"
+          {
+            cmake -S unittest/sql/engine/expr -B "$RUNNER_TEMP/ai-core" \
+              -DGTEST_SOURCE_DIR=/usr/src/googletest -DCMAKE_BUILD_TYPE=Debug
+            cmake --build "$RUNNER_TEMP/ai-core" -j2
+            ctest --test-dir "$RUNNER_TEMP/ai-core" --output-on-failure
+          } 2>&1 | tee "$ACCEPTANCE_OUTPUT/core-tests.log"
 
       - name: Run official AI acceptance and model DDL regression
         shell: bash
@@ -165,5 +174,6 @@ jobs:
         with:
           name: ai-function-acceptance-${{ github.sha }}
           path: ${{ env.ACCEPTANCE_OUTPUT }}
+          include-hidden-files: true
           if-no-files-found: warn
           retention-days: 7
