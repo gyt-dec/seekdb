@@ -60,6 +60,19 @@ jobs:
           key: ${{ runner.os }}-ai-ccache-${{ github.sha }}
           restore-keys: ${{ runner.os }}-ai-ccache-
 
+      - name: Run standalone core and protocol tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          {
+            export PATH=/usr/bin:/bin
+            /usr/bin/cmake -S unittest/sql/engine/expr -B "$RUNNER_TEMP/ai-core" \
+              -DGTEST_SOURCE_DIR=/usr/src/googletest -DCMAKE_BUILD_TYPE=Debug \
+              -DCMAKE_C_COMPILER=/usr/bin/gcc -DCMAKE_CXX_COMPILER=/usr/bin/g++
+            /usr/bin/cmake --build "$RUNNER_TEMP/ai-core" -j2
+            /usr/bin/ctest --test-dir "$RUNNER_TEMP/ai-core" --output-on-failure
+          } 2>&1 | tee "$ACCEPTANCE_OUTPUT/core-tests.log"
+
       - name: Build modified seekdb
         shell: bash
         run: |
@@ -82,18 +95,6 @@ jobs:
         with:
           path: ${{ env.CCACHE_DIR }}
           key: ${{ steps.ccache.outputs.cache-primary-key }}
-
-      - name: Run standalone core and protocol tests
-        shell: bash
-        run: |
-          set -euo pipefail
-          {
-            /usr/bin/cmake -S unittest/sql/engine/expr -B "$RUNNER_TEMP/ai-core" \
-              -DGTEST_SOURCE_DIR=/usr/src/googletest -DCMAKE_BUILD_TYPE=Debug \
-              -DCMAKE_C_COMPILER=/usr/bin/gcc -DCMAKE_CXX_COMPILER=/usr/bin/g++
-            /usr/bin/cmake --build "$RUNNER_TEMP/ai-core" -j2
-            /usr/bin/ctest --test-dir "$RUNNER_TEMP/ai-core" --output-on-failure
-          } 2>&1 | tee "$ACCEPTANCE_OUTPUT/core-tests.log"
 
       - name: Run official AI acceptance and model DDL regression
         shell: bash

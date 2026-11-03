@@ -55,9 +55,9 @@ g++ -std=c++17 -Wall -Wextra -Werror -pthread \
 
 提交 `f71f2164d2808e82c8d10b08e69f02273427d5e2` 已在 GitHub Actions 上完成
 seekdb release 全量编译。首次验收随后在独立测试阶段中止；本地复现发现测试断言全部通过后，
-第二次验收的完整诊断确认，独立测试误用了构建步骤加入 PATH 的 OceanBase 链接器，因找不到
-Ubuntu 启动对象而未能配置。工作流已改为对独立测试明确使用系统 CMake、GCC 和 G++，并补充
-完整阶段日志和隐藏目录 artifact 上传，以便后续运行保留精确证据。
+第二次和第三次验收的完整诊断确认，独立测试继承了构建工具链的 PATH，先后误用了 OceanBase
+链接器和汇编器。工作流已将独立测试提前，并在其子进程中固定纯系统 PATH、CMake、GCC 和 G++；
+同时补充完整阶段日志和隐藏目录 artifact 上传，以便后续运行保留精确证据。
 
 `test_ob_openai_utils.cpp` 的 8 个 Provider/嵌套 JSON Prompt 回归测试，以及
 `test_ob_ai_func_client.cpp` 的 6 个 HTTP 客户端集成测试均依赖 seekdb 运行时，尚未编译或运行，
