@@ -88,10 +88,11 @@ jobs:
         run: |
           set -euo pipefail
           {
-            cmake -S unittest/sql/engine/expr -B "$RUNNER_TEMP/ai-core" \
-              -DGTEST_SOURCE_DIR=/usr/src/googletest -DCMAKE_BUILD_TYPE=Debug
-            cmake --build "$RUNNER_TEMP/ai-core" -j2
-            ctest --test-dir "$RUNNER_TEMP/ai-core" --output-on-failure
+            /usr/bin/cmake -S unittest/sql/engine/expr -B "$RUNNER_TEMP/ai-core" \
+              -DGTEST_SOURCE_DIR=/usr/src/googletest -DCMAKE_BUILD_TYPE=Debug \
+              -DCMAKE_C_COMPILER=/usr/bin/gcc -DCMAKE_CXX_COMPILER=/usr/bin/g++
+            /usr/bin/cmake --build "$RUNNER_TEMP/ai-core" -j2
+            /usr/bin/ctest --test-dir "$RUNNER_TEMP/ai-core" --output-on-failure
           } 2>&1 | tee "$ACCEPTANCE_OUTPUT/core-tests.log"
 
       - name: Run official AI acceptance and model DDL regression

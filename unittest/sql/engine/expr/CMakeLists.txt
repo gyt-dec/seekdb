@@ -30,9 +30,6 @@ endif()
 find_package(Python3 COMPONENTS Interpreter REQUIRED)
 enable_testing()
 add_test(NAME ai_function_core COMMAND ai_function_core_tests)
-# LeakSanitizer cannot inspect processes on every managed CI runner. Address and
-# undefined-behavior checks remain enabled; disable only the leak pass here.
-set_tests_properties(ai_function_core PROPERTIES ENVIRONMENT "ASAN_OPTIONS=detect_leaks=0")
 add_test(NAME ai_mock_protocol COMMAND "${Python3_EXECUTABLE}" -B -m unittest discover
   -s "${CMAKE_CURRENT_LIST_DIR}" -p test_ai_mock_service.py -v)
 
