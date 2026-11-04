@@ -1679,6 +1679,7 @@ stmt::StmtType ObResolverUtils::get_stmt_type_by_item_type(const ObItemType item
   } break;
       // dml
       SET_STMT_TYPE(T_SELECT);
+      SET_STMT_TYPE(T_COPY_FILE_STMT);
       SET_STMT_TYPE(T_INSERT);
       SET_STMT_TYPE(T_DELETE);
       SET_STMT_TYPE(T_UPDATE);
@@ -1847,6 +1848,15 @@ stmt::StmtType ObResolverUtils::get_stmt_type_by_item_type(const ObItemType item
       break;
       case T_SP_CALL_STMT: {
         type = stmt::T_CALL_PROCEDURE;
+      }
+      break;
+      // AI COLUMN statements are rewritten into SELECT / UPDATE
+      case T_SHOW_AI_COLUMNS: {
+        type = stmt::T_SELECT;
+      }
+      break;
+      case T_AI_COLUMN_RETRY: {
+        type = stmt::T_UPDATE;
       }
       break;
       default: {

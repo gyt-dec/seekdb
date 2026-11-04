@@ -2275,6 +2275,19 @@ typedef enum ObItemType
   T_DIFF_TABLE = 4918,
   T_MERGE_TABLE = 4919,
   T_FLUSH_PRIVILEGES = 4920,
+
+  // file sql: file-as-database table functions and COPY TO
+  T_FILE_TABLE_FUNC = 4930,
+  T_FILE_TABLE_ARG = 4931,
+  T_FILE_TABLE_ARG_LIST = 4932,
+  T_COPY_FILE_STMT = 4933,
+  T_COPY_FILE_OPTION = 4934,
+
+  // ai column: async generated AI columns
+  T_AI_COLUMN_DEF = 4935,
+  T_AI_COLUMN_OPTIONS = 4936,
+  T_AI_COLUMN_RETRY = 4937,
+  T_SHOW_AI_COLUMNS = 4938,
   T_MAX //Attention: add a new type before T_MAX
 } ObItemType;
 
