@@ -1,0 +1,71 @@
+name: Competition compile check
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - compile-check
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 300
+    steps:
+    - name: Free Disk Space
+      uses: insightsengineering/disk-space-reclaimer@v1
+      with:
+        tools-cache: false
+        android: true
+        dotnet: true
+        haskell: true
+        large-packages: true
+        swap-storage: true
+        docker-images: true
+
+    - uses: actions/checkout@v3
+
+    - name: Install ubuntu environment
+      shell: bash
+      run: |
+        export DEBIAN_FRONTEND=noninteractive
+        sudo apt-get update
+        sudo apt-get install -y git wget rpm rpm2cpio cpio make build-essential binutils m4 libtool-bin libncurses5 python3
+
+    - name: Setup Rust
+      uses: ./.github/actions/setup-rust
+
+    - name: Cache deps
+      id: cache-deps
+      uses: actions/cache@v3
+      env:
+        cache-name: cache-deps
+      with:
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-el9.x86_64-${{ hashFiles('deps/init/oceanbase.el9.x86_64.deps') }}
+        path: deps/3rd
+
+    - name: Init build
+      shell: bash
+      run: |
+        set -o pipefail
+        ./build.sh release --init 2>&1 | tee init.log || { grep -n -i "error" init.log | head -40; exit 1; }
+        echo "$GITHUB_WORKSPACE/deps/3rd/usr/local/oceanbase/devtools/bin" >> "$GITHUB_PATH"
+
+    - name: Build
+      shell: bash
+      run: |
+        set -o pipefail
+        cd build_release && make -j4 2>&1 | tee ../make.log
+
+    - name: Report compile errors
+      if: failure()
+      shell: bash
+      run: |
+        echo "===== error lines ====="
+        grep -n -E "error:|Error [0-9]+|undefined reference" make.log 2>/dev/null | head -60 || true
+        echo "===== tail of make.log ====="
+        tail -120 make.log 2>/dev/null || true
+        echo "===== failed targets ====="
+        grep -n -E "Error [0-9]+" make.log | head -20 || true
